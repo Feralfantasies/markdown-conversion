@@ -1,6 +1,6 @@
 # markdown-converter
 
-Convert a collection of markdown files into structured JSON for choose-your-own-adventure game engines.
+Convert a collection of markdown files into structured JSON for a text based adventure game engine.
 
 ## Quick Start
 
