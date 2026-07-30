@@ -15,7 +15,8 @@ This bundle documents the **markdown-converter** — a Rust CLI tool that conver
 | Concept | Description |
 |---------|-------------|
 | [Project Overview](project_overview.md) | High-level architecture and design decisions |
-| [Parser Specification](parser.md) | Input format details: frontmatter, story, choices, metadata |
-| [CLI Usage](cli.md) | Command-line interface, arguments, and examples |
-| [JSON Schema](json_schema.md) | Output JSON schema and type definitions |
+| [Parser Specification](parser.md) | Input format details: title, story, choices, metadata blocks |
+| [API Reference](api.md) | HTTP API endpoints and client interaction |
+| [CLI Usage](cli.md) | Command-line arguments and startup |
+| [JSON Schema](json_schema.md) | Output types (Story, Page, Choice) |
 | [Example](example.md) | Concrete input/output walkthrough |
