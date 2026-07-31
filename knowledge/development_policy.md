@@ -1,7 +1,7 @@
 ---
 type: Policy
 title: Development Policy
-description: Branching strategy and commit conventions for the markdown-converter project.
+description: Branching strategy and pull-request workflow rules for the markdown-converter project.
 tags: [policy, workflow, branching]
 generated:
   by: claude-opus-4-20250514/anthropic
