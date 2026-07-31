@@ -16,7 +16,7 @@ generated:
 
 All development work **must** be carried out on feature branches. Nothing should ever be committed directly into `main`.
 
-```
+```text
 main ← PR merges only
  ├─ feature/<name> ← development happens here
  └─ fix/<name>    ← bug fixes here
