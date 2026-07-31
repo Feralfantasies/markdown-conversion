@@ -4,7 +4,7 @@ title: Development Policy
 description: Branching strategy and pull-request workflow rules for the markdown-converter project.
 tags: [policy, workflow, branching]
 generated:
-  by: claude-opus-4-20250514/anthropic
+  by: claude-4-20250514/anthropic
   at: "2025-07-28T17:45:00Z"
 ---
 

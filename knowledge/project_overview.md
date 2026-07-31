@@ -4,7 +4,7 @@ title: Project Overview
 description: High-level architecture, design decisions, and component overview of the markdown-converter.
 tags: [architecture, project, overview]
 generated:
-  by: claude-opus-4-20250514/anthropic
+  by: claude-4-20250514/anthropic
   at: "2025-07-28T17:10:00Z"
 sources:
   - type: repository

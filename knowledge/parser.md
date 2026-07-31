@@ -4,7 +4,7 @@ title: Parser Specification
 description: Detailed specification of the input markdown format — titles, story text, choices, and metadata blocks.
 tags: [parser, format, specification]
 generated:
-  by: claude-opus-4-20250514/anthropic
+  by: claude-4-20250514/anthropic
   at: "2025-07-28T17:10:00Z"
 sources:
   - type: document

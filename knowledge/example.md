@@ -4,7 +4,7 @@ title: Example Input / Output
 description: Concrete walkthrough of input markdown files and their JSON output.
 tags: [example, walkthrough]
 generated:
-  by: claude-opus-4-20250514/anthropic
+  by: claude-4-20250514/anthropic
   at: "2025-07-28T17:10:00Z"
 sources:
   - type: repository
