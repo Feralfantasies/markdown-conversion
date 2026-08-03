@@ -72,6 +72,22 @@ After `### Choices`, each line prefixed with `-` is parsed as a choice.
 | `(link)` | Yes | Target page identifier |
 | `{metadata}` | Yes | Game-logic key-value pairs |
 
+#### Multi-line Metadata Blocks
+
+The `{...}` metadata block may span multiple lines. Lines are accumulated into a single choice until the braces balance:
+
+```markdown
+- [Explore the road]([[road.md]]) {
+  cost=10,
+  functions=[
+  set_character_class(road_warrior),
+  set_background(road.png)
+  ]
+  }
+```
+
+Braces inside double-quoted strings do not affect balancing.
+
 ### Link Formats
 
 | Syntax | Normalised form | Note |
@@ -90,11 +106,36 @@ The `{...}` block supports:
 |-----|------|-------------|---------|
 | `cost` | number | Stamina cost of the selection | `{cost=5}` |
 | `msg` | string | Additional message shown alongside or instead of story text | `{msg="Just burning stamina"}` |
-| `func` | list | Functions to execute on selection, wrapped in `()` | `{func=(set_stats=warrior)}` |
+| `msg` (template) | string + variable | Message with `{}` placeholder filled by a trailing variable name | `{msg="It is {}" current_time}` |
+| `functions` | array | Functions to execute on selection, as `[...]` list | `functions=[set_character_class(warrior), set_background(bg.png)]` |
+| `func` | list | Legacy single-function syntax, wrapped in `()` | `{func=(set_stats=warrior)}` |
 | `req` | list | Inventory items required to make this selection | `{req=herb_red}` |
 | `add_item` | list | Items added on selection | `{add_item=potion_health}` |
 | `remove_item` | list | Items consumed on selection | `{remove_item=herb_red}` |
 | `check` | string | Skill check to evaluate | `{check=INT:15}` |
+
+#### `msg` Template Variables
+
+When a `msg` string contains a `{}` placeholder, a trailing bare identifier names the variable whose value fills it:
+
+```markdown
+msg="You look down at your watch to see the time, its currently {}" current_time
+```
+
+This produces `msg = "You look down at your watch to see the time, its currently {}"` and `msg_var = "current_time"` in the output JSON. The client substitutes the variable's value into the placeholder at render time.
+
+#### `functions` Arrays
+
+The `functions` key accepts a `[...]` array of function call strings. Items may span multiple lines and are split on top-level commas (commas inside `(...)` do not split):
+
+```markdown
+functions=[
+set_character_class(road_warrior),
+set_background(road.png)
+]
+```
+
+Output: `["set_character_class(road_warrior)", "set_background(road.png)"]`. The client is responsible for executing these actions.
 
 #### Bare Number Shortcut
 

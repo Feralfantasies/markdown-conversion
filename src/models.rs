@@ -13,9 +13,15 @@ pub struct Choice {
     /// Optional message to display to the player
     #[serde(skip_serializing_if = "Option::is_none")]
     pub msg: Option<String>,
-    /// Functions to execute (e.g., set_stats=warrior)
+    /// Variable referenced by the msg template (e.g., msg="It is {}" current_time)
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub msg_var: Option<String>,
+    /// Functions to execute (legacy syntax, e.g. func=(set_stats=warrior))
     #[serde(skip_serializing_if = "Option::is_none")]
     pub func: Option<Vec<String>>,
+    /// Functions to execute (e.g., ["set_character_class(road_warrior)", "set_background(road.png)"])
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub functions: Option<Vec<String>>,
     /// Required item(s) for this choice
     #[serde(skip_serializing_if = "Option::is_none")]
     pub req: Option<Vec<String>>,

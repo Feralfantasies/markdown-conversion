@@ -60,13 +60,50 @@ async fn base_url_returns_expected_entry_point() {
     assert_eq!(page.title, "Starting Point", "entry point title");
     assert!(!page.story.is_empty(), "entry point should have story text");
 
-    // The entry page must expose exactly the road and forest choices.
+    // The entry page must expose exactly the road, forest, and self choices.
     let links: HashSet<String> = page.choices.iter().map(|c| c.link.clone()).collect();
     assert_eq!(
         links,
-        HashSet::from(["road".to_string(), "forest".to_string()]),
-        "entry point should link to road and forest, got {:?}",
+        HashSet::from(["road".to_string(), "forest".to_string(), "self".to_string()]),
+        "entry point should link to road, forest, and self, got {:?}",
         links
+    );
+
+    // The self-link choice must carry its action payload through to the client.
+    let watch = page
+        .choices
+        .iter()
+        .find(|c| c.link == "self")
+        .expect("self choice should exist");
+    assert_eq!(watch.cost, Some(0.0), "self choice cost");
+    assert_eq!(
+        watch.functions,
+        Some(vec!["current_time=get_time()".to_string()]),
+        "self choice should carry the get_time function"
+    );
+    assert!(
+        watch.msg.as_deref().unwrap_or("").contains("{}"),
+        "self choice msg should contain a placeholder"
+    );
+    assert_eq!(
+        watch.msg_var.as_deref(),
+        Some("current_time"),
+        "self choice msg should reference the current_time variable"
+    );
+
+    // The navigation choices must carry their function arrays through.
+    let road = page
+        .choices
+        .iter()
+        .find(|c| c.link == "road")
+        .expect("road choice should exist");
+    assert_eq!(
+        road.functions,
+        Some(vec![
+            "set_character_class(road_warrior)".to_string(),
+            "set_background(road.png)".to_string(),
+        ]),
+        "road choice should carry set_character_class + set_background"
     );
 
     println!(
@@ -188,10 +225,11 @@ async fn explores_every_unique_option_exactly_once() {
         "an option was followed more than once"
     );
 
-    // The test_story fixture is fully connected (a triangle), so we expect
-    // exactly 6 unique directed options and 3 visited pages.
+    // The test_story fixture is fully connected (a triangle) plus a self-loop
+    // on the entry page, so we expect exactly 7 unique directed options
+    // (6 page links + 1 self) and 3 visited pages.
     assert_eq!(visited_pages.len(), 3, "should visit all 3 pages");
-    assert_eq!(total_followed, 6, "should follow 6 unique options");
+    assert_eq!(total_followed, 7, "should follow 7 unique options");
     assert!(
         total_encountered > total_followed,
         "loops should be detected (encountered {} > followed {})",
