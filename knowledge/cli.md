@@ -4,7 +4,7 @@ title: CLI Usage
 description: Command-line interface reference — arguments, flags, and usage examples.
 tags: [cli, usage, reference]
 generated:
-  by: claude-opus-4-20250514/anthropic
+  by: claude-4-20250514/anthropic
   at: "2025-07-28T17:10:00Z"
 sources:
   - type: document

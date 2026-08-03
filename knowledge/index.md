@@ -20,3 +20,4 @@ This bundle documents the **markdown-converter** — a Rust CLI tool that conver
 | [CLI Usage](cli.md) | Command-line arguments and startup |
 | [JSON Schema](json_schema.md) | Output types (Story, Page, Choice) |
 | [Example](example.md) | Concrete input/output walkthrough |
+| [Development Policy](development_policy.md) | Branching strategy — no direct commits to `main` |
