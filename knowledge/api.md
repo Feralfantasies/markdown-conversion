@@ -4,7 +4,7 @@ title: API Reference
 description: HTTP API endpoints, request/response formats, and client interaction patterns for the story service.
 tags: [api, http, endpoints]
 generated:
-  by: claude-opus-4-20250514/anthropic
+  by: claude-4-20250514/anthropic
   at: "2025-07-28T17:30:00Z"
 sources:
   - type: document

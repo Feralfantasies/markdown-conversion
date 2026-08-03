@@ -4,7 +4,7 @@ title: JSON Schema
 description: Structure of the output JSON — Story, Page, and Choice types with field definitions.
 tags: [schema, json, output]
 generated:
-  by: claude-opus-4-20250514/anthropic
+  by: claude-4-20250514/anthropic
   at: "2025-07-28T17:10:00Z"
 sources:
   - type: document
