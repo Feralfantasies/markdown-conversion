@@ -1,0 +1,64 @@
+{
+  "name": "Rust Sandbox",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "TZ": "${localEnv:TZ:Europe/London}",
+      "GIT_DELTA_VERSION": "0.18.2",
+      "ZSH_IN_DOCKER_VERSION": "1.2.0"
+    }
+  },
+  "portsAttributes": {
+    "3000": {
+      "label": "Markdown Converter App",
+      "onAutoForward": "notify"
+    }
+  },
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW",
+    "--userns=keep-id:uid=1000,gid=1000",
+    "--env-file",
+    "${localWorkspaceFolder}/.env",
+    "--group-add=keep-groups"
+  ],
+  "containerUser": "claude",
+  "remoteUser": "claude",
+  "updateRemoteUserUID": true,
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+
+  "mounts": [
+    "source=bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+    "source=rust-cargo,target=/home/claude/.cargo,type=volume",
+    "source=/run/user/1000/podman/podman.sock,target=/var/run/docker.sock,type=bind"
+  ],
+
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "HOME": "/home/claude",
+    "CONTAINER_HOST": "unix:///var/run/docker.sock",
+    "CONTAINER_ENGINE_CONTEXT": "remote"
+  },
+
+  // 3. Consistency:delegated helps Podman handle host-to-container write speeds
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+
+  // "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
+  "postCreateCommand": "bash /workspace/.devcontainer/setup.sh",
+  "waitFor": "postStartCommand"
+}
