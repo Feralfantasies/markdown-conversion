@@ -45,7 +45,8 @@
     "source=bashhistory-${devcontainerId},target=/commandhistory,type=volume",
     "source=rust-cargo,target=/home/claude/.cargo,type=volume",
     "source=/run/user/1000/podman/podman.sock,target=/var/run/docker.sock,type=bind",
-    "source=${localEnv:HOME}/.config/Code/User/globalStorage/saoudrizwan.claude-dev,target=/home/claude/.config/Code/User/globalStorage/saoudrizwan.claude-dev,type=bind,consistency=delegated"
+    // Share the host's Cline config (provider settings, MCP servers, history) with the container
+    "source=${localEnv:HOME}/.cline,target=/home/claude/.cline,type=bind,consistency=delegated"
   ],
 
   "containerEnv": {
