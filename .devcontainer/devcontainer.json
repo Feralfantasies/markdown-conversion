@@ -31,7 +31,8 @@
       "extensions": [
         "rust-lang.rust-analyzer",
         "tamasfe.even-better-toml",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "saoudrizwan.claude-dev"
       ],
       "settings": {
         "editor.formatOnSave": true,
@@ -43,7 +44,8 @@
   "mounts": [
     "source=bashhistory-${devcontainerId},target=/commandhistory,type=volume",
     "source=rust-cargo,target=/home/claude/.cargo,type=volume",
-    "source=/run/user/1000/podman/podman.sock,target=/var/run/docker.sock,type=bind"
+    "source=/run/user/1000/podman/podman.sock,target=/var/run/docker.sock,type=bind",
+    "source=${localEnv:HOME}/.config/Code/User/globalStorage/saoudrizwan.claude-dev,target=/home/claude/.config/Code/User/globalStorage/saoudrizwan.claude-dev,type=bind,consistency=delegated"
   ],
 
   "containerEnv": {
