@@ -190,7 +190,10 @@ fn parse_msg_value(value: &str) -> (String, Option<String>) {
         }
 
         // Everything after the closing quote is the optional variable name.
-        let remainder: String = chars.get(i + 1..).map(|c| c.iter().collect()).unwrap_or_default();
+        let remainder: String = chars
+            .get(i + 1..)
+            .map(|c| c.iter().collect())
+            .unwrap_or_default();
         let var = remainder.trim().trim_end_matches(',').trim().to_string();
         let var = if var.is_empty() { None } else { Some(var) };
         (message, var)
@@ -335,10 +338,7 @@ fn parse_choice_block(block: &str) -> Option<Choice> {
                     }
                     "func" => {
                         // Legacy single-function syntax wrapped in ().
-                        let inner = val
-                            .trim()
-                            .trim_start_matches('(')
-                            .trim_end_matches(')');
+                        let inner = val.trim().trim_start_matches('(').trim_end_matches(')');
                         func = Some(
                             inner
                                 .split(',')
@@ -769,7 +769,10 @@ Adventure begins.
         let watch = &page.choices[2];
         assert_eq!(watch.link, "self");
         assert_eq!(watch.cost, Some(0.0));
-        assert_eq!(watch.functions, Some(vec!["current_time=get_time()".to_string()]));
+        assert_eq!(
+            watch.functions,
+            Some(vec!["current_time=get_time()".to_string()])
+        );
         assert_eq!(watch.msg_var, Some("current_time".to_string()));
     }
 }

@@ -24,7 +24,9 @@ struct Cli {
 
 #[tokio::main]
 async fn main() {
-    dotenv().unwrap();
+    // Load `.env` if present; it's optional (e.g. container deployments
+    // pass environment variables directly).
+    let _ = dotenv();
     let args = Cli::parse();
 
     let state = AppState::new(&args.story_dir, &args.entry_point);

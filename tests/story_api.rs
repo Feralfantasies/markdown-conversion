@@ -47,13 +47,12 @@ async fn base_url_returns_expected_entry_point() {
         .await
         .expect("failed to reach base URL");
 
-    assert_eq!(
-        resp.status(),
-        200,
-        "GET / should return HTTP 200"
-    );
+    assert_eq!(resp.status(), 200, "GET / should return HTTP 200");
 
-    let page: Page = resp.json().await.expect("response should be valid Page JSON");
+    let page: Page = resp
+        .json()
+        .await
+        .expect("response should be valid Page JSON");
 
     // Value checks against the test_story fixture.
     assert_eq!(page.filename, "starting_point", "entry point filename");
@@ -106,11 +105,7 @@ async fn base_url_returns_expected_entry_point() {
         "road choice should carry set_character_class + set_background"
     );
 
-    println!(
-        "base_url OK: {} choices -> {:?}",
-        page.choices.len(),
-        links
-    );
+    println!("base_url OK: {} choices -> {:?}", page.choices.len(), links);
 }
 
 // ── Test 2: Explore every unique option (loop-safe BFS) ─────────────────────

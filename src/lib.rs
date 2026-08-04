@@ -71,7 +71,7 @@ async fn get_start(
         Some(page) => Ok(Json(page.clone())),
         None => Err((
             StatusCode::NOT_FOUND,
-            format!("Entry point '{}' not found", &*state.entry_point),
+            format!("Entry point '{}' not found", state.entry_point),
         )),
     }
 }
