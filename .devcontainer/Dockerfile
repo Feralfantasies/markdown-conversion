@@ -21,7 +21,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Now that /etc/sudoers.d exists and /usr/bin/zsh exists, this will work.
 RUN groupadd --gid 1000 claude \
   && useradd --uid 1000 --gid 1000 -m -s /usr/bin/zsh claude \
-  && echo "claude ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/claude \
+  && printf '%s\n' \
+       "claude ALL=(root) NOPASSWD: /bin/chown claude\\:claude /var/run/docker.sock" \
+       "claude ALL=(root) NOPASSWD: /bin/chmod 660 /var/run/docker.sock" \
+       "claude ALL=(root) NOPASSWD: /bin/ln -s /usr/bin/podman /usr/bin/docker" \
+       > /etc/sudoers.d/claude \
   && chmod 0440 /etc/sudoers.d/claude
 
 # 3. SET UP PATHS & PERMISSIONS

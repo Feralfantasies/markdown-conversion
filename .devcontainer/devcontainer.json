@@ -14,6 +14,7 @@
       "onAutoForward": "notify"
     }
   },
+  "initializeCommand": "test -f .env || cp .env.example .env",
   "runArgs": [
     "--cap-add=NET_ADMIN",
     "--cap-add=NET_RAW",
@@ -43,8 +44,8 @@
 
   "mounts": [
     "source=bashhistory-${devcontainerId},target=/commandhistory,type=volume",
-    "source=rust-cargo,target=/home/claude/.cargo,type=volume",
-    "source=/run/user/1000/podman/podman.sock,target=/var/run/docker.sock,type=bind",
+    "source=markdown-conversion-cargo,target=/home/claude/.cargo,type=volume",
+    "source=${localEnv:XDG_RUNTIME_DIR}/podman/podman.sock,target=/var/run/docker.sock,type=bind",
     // Share the host's Cline config (provider settings, MCP servers, history) with the container
     "source=${localEnv:HOME}/.cline,target=/home/claude/.cline,type=bind,consistency=delegated"
   ],
@@ -61,7 +62,6 @@
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",
 
-  // "postStartCommand": "sudo /usr/local/bin/init-firewall.sh",
   "postCreateCommand": "bash /workspace/.devcontainer/setup.sh",
-  "waitFor": "postStartCommand"
+  "waitFor": "postCreateCommand"
 }

@@ -233,7 +233,7 @@ fn split_list(value: &str) -> Vec<String> {
 /// ignoring braces inside double-quoted strings.
 fn extract_metadata_block(input: &str) -> Option<String> {
     let chars: Vec<char> = input.chars().collect();
-    let start = input.find('{')?;
+    let start = chars.iter().position(|&c| c == '{')?;
     let mut depth: i32 = 0;
     let mut in_string = false;
     let mut escaped = false;
