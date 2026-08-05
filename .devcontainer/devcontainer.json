@@ -1,0 +1,67 @@
+{
+  "name": "Rust Sandbox",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "TZ": "${localEnv:TZ:Europe/London}",
+      "GIT_DELTA_VERSION": "0.18.2",
+      "ZSH_IN_DOCKER_VERSION": "1.2.0"
+    }
+  },
+  "portsAttributes": {
+    "3000": {
+      "label": "Markdown Converter App",
+      "onAutoForward": "notify"
+    }
+  },
+  "initializeCommand": "test -f .env || cp .env.example .env",
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW",
+    "--userns=keep-id:uid=1000,gid=1000",
+    "--env-file",
+    "${localWorkspaceFolder}/.env",
+    "--group-add=keep-groups"
+  ],
+  "containerUser": "claude",
+  "remoteUser": "claude",
+  "updateRemoteUserUID": true,
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "tamasfe.even-better-toml",
+        "eamodio.gitlens",
+        "saoudrizwan.claude-dev"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    }
+  },
+
+  "mounts": [
+    "source=bashhistory-${devcontainerId},target=/commandhistory,type=volume",
+    "source=markdown-conversion-cargo,target=/home/claude/.cargo,type=volume",
+    "source=${localEnv:XDG_RUNTIME_DIR}/podman/podman.sock,target=/var/run/docker.sock,type=bind",
+    // Share the host's Cline config (provider settings, MCP servers, history) with the container
+    "source=${localEnv:HOME}/.cline,target=/home/claude/.cline,type=bind,consistency=delegated"
+  ],
+
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "HOME": "/home/claude",
+    "CONTAINER_HOST": "unix:///var/run/docker.sock",
+    "CONTAINER_ENGINE_CONTEXT": "remote"
+  },
+
+  // 3. Consistency:delegated helps Podman handle host-to-container write speeds
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+
+  "postCreateCommand": "bash /workspace/.devcontainer/setup.sh",
+  "waitFor": "postCreateCommand"
+}

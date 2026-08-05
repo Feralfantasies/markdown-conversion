@@ -43,12 +43,19 @@ A single selection option presented to the player.
 | `display` | string | Yes | Text shown on the button or option |
 | `link` | string | Yes | Target page identifier. `self` means stay on current page. Extensions are stripped; `[[ ]]` unwrapped. |
 | `cost` | number \| null | Optional | Stamina cost |
-| `msg` | string \| null | Optional | Additional message to display |
-| `func` | string[] \| null | Optional | Functions to execute (e.g. `["set_stats=warrior"]`) |
+| `msg` | string \| null | Optional | Additional message to display. May contain a `{}` placeholder filled using `msg_var` |
+| `msg_var` | string \| null | Optional | Variable name whose value fills the `{}` placeholder in `msg` |
+| `functions` | string[] \| null | Optional | Actions for the client to execute (e.g. `["set_character_class(road_warrior)", "set_background(road.png)"]`) |
+| `func` | string[] \| null | Optional | Legacy single-function syntax (e.g. `["set_stats=warrior"]`) |
 | `req` | string[] \| null | Optional | Required inventory items |
 | `add_item` | string[] \| null | Optional | Items added on selection |
 | `remove_item` | string[] \| null | Optional | Items consumed on selection |
 | `check` | string \| null | Optional | Skill check specification (e.g. `"INT:15"`) |
+
+> Client responsibility: the API is stateless and only transports these
+> action payloads. The client processes `functions`, applies `cost`, renders
+> `msg` (substituting `msg_var` into the `{}` placeholder), and evaluates
+> `req` / `add_item` / `remove_item` / `check` as needed.
 
 ## Minimal Example
 
@@ -72,6 +79,23 @@ A single selection option presented to the player.
           "link": "right_path",
           "cost": 1.0,
           "msg": "Dangerous"
+        },
+        {
+          "display": "Explore the road",
+          "link": "road",
+          "cost": 10.0,
+          "functions": [
+            "set_character_class(road_warrior)",
+            "set_background(road.png)"
+          ]
+        },
+        {
+          "display": "Check your watch",
+          "link": "self",
+          "cost": 0.0,
+          "functions": ["current_time=get_time()"],
+          "msg": "You look down at your watch to see the time, its currently {}",
+          "msg_var": "current_time"
         }
       ]
     }

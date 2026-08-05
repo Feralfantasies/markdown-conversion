@@ -1,0 +1,187 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs on the same branch when a new push arrives.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  # ── 1. Format ──────────────────────────────────────────────────────────────
+  fmt:
+    name: Format
+    runs-on: firethorn
+    timeout-minutes: 10
+    steps:
+      # rustfmt is a pure Rust binary — no C toolchain needed.
+
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      - name: cargo fmt --check
+        run: cargo fmt --all -- --check
+
+  # ── 2. Clippy ─────────────────────────────────────────────────────────────
+  clippy:
+    name: Clippy
+    runs-on: firethorn
+    timeout-minutes: 30
+    steps:
+      # --all-targets also compiles dev-dependencies (reqwest), whose
+      # default-tls feature needs OpenSSL headers via openssl-sys.
+      - name: Install system dependencies
+        run: |
+          FAILED=true
+          for i in 1 2 3; do
+            if sudo apt-get update -qq && sudo apt-get install -y build-essential pkg-config libssl-dev; then
+              FAILED=false
+              break
+            fi
+            echo "apt-get attempt $i failed; retrying in 10 s..."
+            sleep 10
+          done
+          if [ "$FAILED" = true ]; then
+            echo "::error::Failed to install dependencies after 3 attempts"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: cargo clippy — deny all warnings
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+  # ── 3. Build ──────────────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: firethorn
+    timeout-minutes: 30
+    steps:
+      - name: Install system dependencies
+        run: |
+          FAILED=true
+          for i in 1 2 3; do
+            if sudo apt-get update -qq && sudo apt-get install -y build-essential pkg-config libssl-dev musl-tools; then
+              FAILED=false
+              break
+            fi
+            echo "apt-get attempt $i failed; retrying in 10 s..."
+            sleep 10
+          done
+          if [ "$FAILED" = true ]; then
+            echo "::error::Failed to install dependencies after 3 attempts"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
+
+      - name: cargo build — workspace (warnings as errors)
+        run: RUSTFLAGS="-D warnings" cargo build --workspace
+
+      - name: cargo build — musl static target
+        run: RUSTFLAGS="-D warnings" cargo build --release --target x86_64-unknown-linux-musl
+
+  # ── 4. Rust tests ─────────────────────────────────────────────────────────
+  rust-tests:
+    name: Rust Tests
+    runs-on: firethorn
+    timeout-minutes: 30
+    needs: [fmt, clippy]
+    steps:
+      - name: Install system dependencies
+        run: |
+          for i in 1 2 3; do
+            sudo apt-get update -qq && sudo apt-get install -y build-essential pkg-config libssl-dev && break
+            echo "apt-get attempt $i failed; retrying in 10 s..."
+            sleep 10
+          done
+
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: cargo test
+        run: cargo test --workspace
+
+  # ── 5. Container build ────────────────────────────────────────────────────
+  container:
+    name: Container Build
+    runs-on: firethorn
+    timeout-minutes: 45
+    needs: [build, rust-tests]
+    if: github.ref == 'refs/heads/main' || github.base_ref == 'main'
+
+    steps:
+      - name: Install system dependencies
+        run: |
+          FAILED=true
+          for i in 1 2 3; do
+            if sudo apt-get update -qq && sudo apt-get install -y docker.io curl; then
+              FAILED=false
+              break
+            fi
+            echo "apt-get attempt $i failed; retrying in 10 s..."
+            sleep 10
+          done
+          if [ "$FAILED" = true ]; then
+            echo "::error::Failed to install dependencies after 3 attempts"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Build container image
+        # Disable BuildKit: it fails with "cannot set cgroup parent" on
+        # self-hosted runners whose Docker daemon lacks nested cgroup v2 support.
+        env:
+          DOCKER_BUILDKIT: "0"
+        run: docker build -f Containerfile -t markdown-converter:ci .
+
+      # Run the container serving the bundled test_story fixture and
+      # verify the API actually responds.
+      - name: Smoke test — run container and query API
+        run: |
+          docker run -d --name markdown-converter-smoke -p 3000:3000 markdown-converter:ci
+          READY=0
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/pages > /dev/null 2>&1; then
+              READY=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$READY" -ne 1 ]; then
+            echo "::error::container did not become ready in time"
+            docker logs markdown-converter-smoke
+            docker rm -f markdown-converter-smoke
+            exit 1
+          fi
+          echo "API response from /pages:"
+          curl -sf http://localhost:3000/pages
+          echo
+          docker rm -f markdown-converter-smoke
