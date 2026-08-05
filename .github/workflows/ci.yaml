@@ -156,6 +156,10 @@ jobs:
           persist-credentials: false
 
       - name: Build container image
+        # Disable BuildKit: it fails with "cannot set cgroup parent" on
+        # self-hosted runners whose Docker daemon lacks nested cgroup v2 support.
+        env:
+          DOCKER_BUILDKIT: "0"
         run: docker build -f Containerfile -t markdown-converter:ci .
 
       # Run the container serving the bundled test_story fixture and
